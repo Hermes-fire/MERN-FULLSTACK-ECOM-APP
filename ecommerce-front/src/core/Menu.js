@@ -19,6 +19,12 @@ const Menu = ({history}) => (
     <Navbar.Collapse id="responsive-navbar-nav">
         <Nav className="me-auto">
         <Nav.Link as={Link} to={'/'} style={isActive(history,'/')}>Home</Nav.Link>
+        {isAuthenticated() && isAuthenticated().user.role === 0 && (
+            <Nav.Link as={Link} to={'/user/dashboard'} style={isActive(history,'/user/dashboard')}>Dashboard</Nav.Link>
+        )}
+        {isAuthenticated() && isAuthenticated().user.role === 1 && (
+            <Nav.Link as={Link} to={'/admin/dashboard'} style={isActive(history,'/admin/dashboard')}>Dashboard</Nav.Link>
+        )}
         {!isAuthenticated() && (
             <Fragment>
                 <Nav.Link as={Link} to={'/signin'} style={isActive(history,'/signin')}>Signin</Nav.Link>
