@@ -54,7 +54,7 @@ exports.create = (req,res) => {
         product.save((err, result) =>{
             if(err){
                 return res.status(400).json({
-                    error: err//errorHandler(err)
+                    error: err
                 })
             }
             res.json(result)
@@ -128,7 +128,7 @@ exports.list = (req,res) => {
                 error:  'Product not found'
             })
         }
-        res.json({data})
+        res.json(data)
     })
 }
 //product that have same category

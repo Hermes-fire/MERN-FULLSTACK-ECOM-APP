@@ -3,6 +3,7 @@ import Layout from '../core/Layout'
 import {isAuthenticated} from '../auth'
 import { Link } from 'react-router-dom';
 import {createProduct} from './apiAdmin'
+import { getCategories } from './apiAdmin';
 
 const AddProduct = () => {
     const {user, token} = isAuthenticated()
@@ -11,6 +12,7 @@ const AddProduct = () => {
         description: '',
         price: '',
         category: '',
+        categories: [],
         shipping: '',
         quantity: '',
         photo: '',
@@ -26,6 +28,7 @@ const AddProduct = () => {
         description,
         price,
         category,
+        categories,
         shipping,
         quantity,
         loading,
@@ -35,9 +38,6 @@ const AddProduct = () => {
         formData
     } = values
 
-    useEffect(()=>{
-        setValues({...values, formData: new FormData()})
-    },[])
 
     const handleChange = name => event => {
         const value = name === 'photo' ? event.target.files[0] : event.target.value
@@ -51,7 +51,7 @@ const AddProduct = () => {
         setValues({...values, error: '', loading: true})
 
         createProduct(user._id, token, formData)
-            .then(data =>{
+            .then(data => {
                 if(data.error) {
                     setValues({...values, error: data.error})
                 }else{
@@ -68,6 +68,20 @@ const AddProduct = () => {
                 }
             })
     }
+    //load categories and set form data
+    const init = () => {
+        getCategories().then(data => {
+            if(data.error){
+                setValues({...values, error: data.error})
+            }else{
+                setValues({...values, categories: data, formData: new FormData()})
+            }
+        })
+    }
+
+    useEffect(()=>{
+        init()
+    },[])
 
     const newPostForm = () => (
         <form className='mb-3' onSubmit={clickSubmit}>
@@ -92,8 +106,10 @@ const AddProduct = () => {
             <div className='form-group'>
                 <label className='text-muted'>Category</label>
                 <select className='form-control' onChange={handleChange('category')}>
-                     <option value='623385fbdef0ced5d7c72bdc'>Node</option>
-                     <option value='623385fbdef0ced5d7c72bdc'>Php</option>
+                     <option>Please select</option>
+                     {categories && categories.map((c,i) => (
+                         <option key={i} value={c._id}>{c.name}</option>
+                     ))}
                 </select>
             </div>
             <div className='form-group'>
@@ -103,6 +119,7 @@ const AddProduct = () => {
             <div className='form-group'>
                 <label className='text-muted'>Shipping</label>
                 <select className='form-control' onChange={handleChange('shipping')}>
+                <option>Please select</option>
                      <option value='0'>No</option>
                      <option value='1'>Yes</option>
                 </select>
@@ -110,11 +127,26 @@ const AddProduct = () => {
             <button className = 'btn btn-outline-primary'>Create Product</button>
         </form>
     )
+
+    const showError = () => (
+        <div className='alert alert-danger' style={{display: error ? '' : 'none'}}>
+            {JSON.stringify(error)}
+        </div>
+    )
+
+    const showSucess = () => (
+        <div className='alert alert-info' style={{display: createdProduct ? '' : 'none'}}>
+            <h2>{`${createdProduct}`} is created</h2>
+        </div>
+    )
+
     return (
         <Layout title='Add a new product' description={`Hello ${user.name}, ready to add new product ?`} className = 'container-fluid'>
         <div className="container">
             <div className="row">
                 <div className="col-md-8 offset-2">
+                    {showSucess()}
+                    {showError()}
                     {newPostForm()}
                 </div>
             </div>
